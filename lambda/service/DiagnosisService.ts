@@ -1,7 +1,10 @@
 import { success } from "../lib/Response";
-import LambdaContext from "../model/LambdaContext";
+import ContextWithLambdaBindings from "../model/LambdaContext";
 
-export const showEvent = async (c: LambdaContext) => {
-    const { event } = c.env;
-    return success(c, event);
+export const showEvent = async (c: ContextWithLambdaBindings) => {
+    if (process.env.STAGE === "dev") {
+        return success(c, c.env.event);
+    }
+
+    return c.notFound();
 };

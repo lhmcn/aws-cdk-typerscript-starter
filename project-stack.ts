@@ -58,7 +58,8 @@ export class ProjectStack extends Stack {
             handler: "mainController",
             environment: {
                 ATTACHMENT_BUCKET_NAME: attachmentBucket.bucketName,
-                DYNAMODB_TABLE_NAME: dynamodbTable.tableName
+                DYNAMODB_TABLE_NAME: dynamodbTable.tableName,
+                STAGE: process.env.STAGE || ""
             }
         });
 
