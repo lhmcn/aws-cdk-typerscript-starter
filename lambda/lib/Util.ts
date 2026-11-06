@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { LambdaEvent } from "@hono/aws-lambda";
 import { v7 } from "uuid";
 
 export type UserCredential = {
@@ -17,31 +17,29 @@ export const getFileExtension = (filename: string): string => {
     return ext === filename ? "" : ext;
 };
 
-export const extractUserCredential = (
-    event: APIGatewayProxyEvent
-): UserCredential => {
+export const extractUserCredential = (event: LambdaEvent): UserCredential => {
     const credentials: UserCredential = {
         UserPoolId: "",
         sub: "",
-        IdentityId: event.requestContext.identity.cognitoIdentityId
+        IdentityId: null
     };
 
-    const provider =
-        event.requestContext.identity.cognitoAuthenticationProvider;
-    if (provider) {
-        const segments = provider.split("/")[2].split(":");
-        credentials.UserPoolId = segments[0];
-        credentials.sub = segments[2];
+    const identity = (event.requestContext as any).identity;
+    if (identity) {
+        credentials.IdentityId = identity.cognitoIdentityId || null;
+
+        const provider = identity.cognitoAuthenticationProvider as string;
+        if (provider) {
+            const segments = provider.split("/")[2].split(":");
+            credentials.UserPoolId = segments[0];
+            credentials.sub = segments[2];
+        }
     }
 
     return credentials;
 };
 
-export const paginate = <T = any>(
-    data: T[],
-    page: number = 1,
-    size: number = 20
-): PaginatedItems<T> => {
+export const paginate = <T = any>(data: T[], page: number = 1, size: number = 20): PaginatedItems<T> => {
     const ret: PaginatedItems<T> = {
         items: [],
         count: 0
